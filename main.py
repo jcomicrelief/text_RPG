@@ -1,4 +1,5 @@
 """"""
+from command import *
 """Container"""
 
 
@@ -144,64 +145,64 @@ class Player(Character):
         # raw_input()
 
 
-"""Commands"""
-
-
-# inventory command
-def pack(player, args):
-    if len(player.inventory) == 0:
-        print("You aren't carrying anything.")
-    else:
-        for name, item in player.inventory:
-            if item.quantity == 1:
-                print("{0}".format(item.name))
-            else:
-                print("{0} x{1}".format(item.name, item.quantity))
-
-
-# look command
-def look(player, args):  # maybe change "args" to the object or whatever
-    pass
-
-
-# quit command
-def escape(player, args):
-    player.die("Thanks for playing!")
-
-
-# help command
-def aid(player, args):
-    lst = []
-    for command in commands:
-        lst.append(command)
-    lst.sort()
-    lst = ", ".join(lst)
-    print(lst)
-
-# dictionary of commands
-commands = {
-    "help": aid,
-    "inventory": pack,
-    "quit": escape,
-}
-
-# dictionary of invisible commands
-# for the purpose of giving player commands as they learn
-invisible = {
-    "look": look,
-}
-
-
-# setting up commands
-def is_valid_cmd(cmd):
-    if cmd in commands:
-        return True
-    return False
-
-
-# run commands
-def run_cmd(cmd, args, player):
-    commands[cmd](player, args)
+# """Commands"""
+#
+#
+# # inventory command
+# def pack(player, args):
+#     if len(player.inventory) == 0:
+#         print("You aren't carrying anything.")
+#     else:
+#         for name, item in player.inventory:
+#             if item.quantity == 1:
+#                 print("{0}".format(item.name))
+#             else:
+#                 print("{0} x{1}".format(item.name, item.quantity))
+#
+#
+# # look command
+# def look(player, args):  # maybe change "args" to the object or whatever
+#     pass
+#
+#
+# # quit command
+# def escape(player, args):
+#     player.die("Thanks for playing!")
+#
+#
+# # help command
+# def aid(player, args):
+#     lst = []
+#     for command in commands:
+#         lst.append(command)
+#     lst.sort()
+#     lst = ", ".join(lst)
+#     print(lst)
+#
+# # dictionary of commands
+# commands = {
+#     "help": aid,
+#     "inventory": pack,
+#     "quit": escape,
+# }
+#
+# # dictionary of invisible commands
+# # for the purpose of giving player commands as they learn
+# invisible = {
+#     "look": look,
+# }
+#
+#
+# # setting up commands
+# def is_valid_cmd(cmd):
+#     if cmd in commands:
+#         return True
+#     return False
+#
+#
+# # run commands
+# def run_cmd(cmd, args, player):
+#     commands[cmd](player, args)
 
 
 """Basic Variables"""
@@ -246,12 +247,14 @@ def main():
     show_room()
 
     while not player.dead:
-        line = raw_input(">> ")
-        user = line.split()
-        user.append("EOI")
-        if is_valid_cmd(user[0]):
-            run_cmd(user[0], user[1:], player)
-        else:
-            print("Not a valid command.")
+        user = Commands()
+        user.menu()
+        # line = raw_input(">> ")
+        # user = line.split()
+        # user.append("EOI")
+        # if is_valid_cmd(user[0]):
+        #     run_cmd(user[0], user[1:], player)
+        # else:
+        #     print("Not a valid command.")
 
 main()
