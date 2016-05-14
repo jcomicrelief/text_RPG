@@ -1,5 +1,4 @@
 """"""
-from command import *
 """Container"""
 
 
@@ -135,6 +134,7 @@ class Player(Character):
     def __init__(self, name, health, strength):
         Character.__init__(self, name, health, strength)
         self.inventory = Container("Inventory")
+        self.journal = {}
         self.location = Room("Hall", "The hall looks like a room.")
 
     def die(self, message="Game Over!"):
@@ -145,66 +145,6 @@ class Player(Character):
         # raw_input()
 
 
-# """Commands"""
-#
-#
-# # inventory command
-# def pack(player, args):
-#     if len(player.inventory) == 0:
-#         print("You aren't carrying anything.")
-#     else:
-#         for name, item in player.inventory:
-#             if item.quantity == 1:
-#                 print("{0}".format(item.name))
-#             else:
-#                 print("{0} x{1}".format(item.name, item.quantity))
-#
-#
-# # look command
-# def look(player, args):  # maybe change "args" to the object or whatever
-#     pass
-#
-#
-# # quit command
-# def escape(player, args):
-#     player.die("Thanks for playing!")
-#
-#
-# # help command
-# def aid(player, args):
-#     lst = []
-#     for command in commands:
-#         lst.append(command)
-#     lst.sort()
-#     lst = ", ".join(lst)
-#     print(lst)
-#
-# # dictionary of commands
-# commands = {
-#     "help": aid,
-#     "inventory": pack,
-#     "quit": escape,
-# }
-#
-# # dictionary of invisible commands
-# # for the purpose of giving player commands as they learn
-# invisible = {
-#     "look": look,
-# }
-#
-#
-# # setting up commands
-# def is_valid_cmd(cmd):
-#     if cmd in commands:
-#         return True
-#     return False
-#
-#
-# # run commands
-# def run_cmd(cmd, args, player):
-#     commands[cmd](player, args)
-
-
 """Basic Variables"""
 player = Player("Default", 1, 1)
 """Room Variables"""
@@ -212,6 +152,114 @@ hall = Room("Hall", "The hall looks like a room.")
 bedroom = Room("Bedroom", "It's the bedroom.")
 kitchen = Room("Kitchen", "It's the kitchen.")
 bathroom = Room("Bathroom", "It's the bathroom.")
+
+
+"""Commands"""
+# note to self: use 'args' as the player's raw_input
+
+
+# check command (inventory and items)
+def check(player, args):
+    # if second word is 'inventory'
+    if args[1] == "inventory":
+        # if player has nothing in their inventory
+        if len(player.inventory) == 0:
+            print("You aren't carrying anything.")
+            # testing purposes (START)
+            potion = Item("Potion", 5, 2)
+            lizard = Item("Magical Lizard", 9000, 1)
+            player.inventory.add(potion)
+            player.inventory.add(lizard)
+            # testing purposes (END)
+        # if player has items
+        else:
+            for name, item in player.inventory:
+                # if item quantity is only one
+                if item.quantity == 1:
+                    print("{0}".format(item.name))
+                # shows item quantity
+                else:
+                    print("{0} x{1}".format(item.name, item.quantity))
+    # if the second word is an item name
+    # items not implemented yet (breaks game right now [AttributeError: 'str' object has no attribute 'raw']
+    # [line 17, in __contains__return item.raw in self.inside])
+    elif args[1] in player.inventory:
+        print("Items not implemented yet")
+    else:
+        print("Check what?")
+
+
+# quit command
+def escape(player, args):
+    player.die("Thanks for playing!")
+
+
+# look command (around and at)
+def look(player, args):
+    # if second word is 'around'
+    if args[1] == "around":
+        print(player.location.description)
+    # if second word is 'at'
+    # objects in rooms not implemented yet
+    elif args[1] == "at":
+        print("Objects in rooms not implemented yet")
+    else:
+        print("Look where?")
+
+
+# read command (journal and titles)
+def read(player, args):
+    # if second word is 'journal'
+    if args[1] == "journal":
+        # if journal not empty
+        if player.journal != {}:
+            print("\n".join(player.journal.keys()).title())
+        # if journal is empty
+        else:
+            print("Your journal is empty.")
+    # if second word is a title name
+    # notes not implemented yet
+    elif args[1] in player.journal.keys():
+        print(player.journal[args[1]])
+    else:
+        print("Read what?")
+
+
+# help command
+def aid(player, args):
+    lst = []
+    for command in commands:
+        lst.append(command)
+    lst.sort()
+    lst = ", ".join(lst)
+    print(lst)
+
+# dictionary of commands
+commands = {
+    "help": aid,
+    "check": check,
+    "quit": escape,
+    "look": look,
+    "read": read,
+}
+
+# dictionary of invisible commands
+# for the purpose of giving player commands as they learn
+invisible = {
+    "temp": look,
+}
+
+
+# setting up commands
+def is_valid_cmd(cmd):
+    if cmd in commands:
+        return True
+    return False
+
+
+# run commands
+def run_cmd(cmd, args, player):
+    commands[cmd](player, args)
 
 
 """Main game file"""
@@ -247,14 +295,12 @@ def main():
     show_room()
 
     while not player.dead:
-        user = Commands()
-        user.menu()
-        # line = raw_input(">> ")
-        # user = line.split()
-        # user.append("EOI")
-        # if is_valid_cmd(user[0]):
-        #     run_cmd(user[0], user[1:], player)
-        # else:
-        #     print("Not a valid command.")
+        line = raw_input(">> ")
+        user = line.split()
+        user.append("EOI")
+        if is_valid_cmd(user[0]):
+            run_cmd(user[0], user, player)
+        else:
+            print("Not a valid command.")
 
 main()
