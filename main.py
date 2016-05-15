@@ -90,14 +90,14 @@ class Room(Container):
 
     def connect(self, north=None, south=None, east=None, west=None, up=None, down=None):
         self.north = north
-        if north:
+        if north is not None:
             north.south = self
         self.south = south
         if south:
             south.north = self
         self.east = east
-        if east:
-            east.west = west
+        if east is not None:
+            east.west = self
         self.west = west
         if west:
             west.east = west
@@ -135,7 +135,7 @@ class Player(Character):
         Character.__init__(self, name, health, strength)
         self.inventory = Container("Inventory")
         self.journal = {}
-        self.location = Room("Hall", "The hall looks like a room.")
+        self.location = None
 
     def die(self, message="Game Over!"):
         print(message)
@@ -152,10 +152,31 @@ hall = Room("Hall", "The hall looks like a room.")
 bedroom = Room("Bedroom", "It's the bedroom.")
 kitchen = Room("Kitchen", "It's the kitchen.")
 bathroom = Room("Bathroom", "It's the bathroom.")
+"""Connect Rooms"""
 
 
 """Commands"""
 # note to self: use 'args' as the player's raw_input
+
+
+# go command (player location)
+def go(player, args):
+    direction = args[1]
+    room_message = "You stepped into the {0}."
+    if direction == "east" and player.location.east is not None:
+        player.location = player.location.east
+        print(room_message.format(player.location.name))
+    elif direction == "west" and player.location.west is not None:
+        player.location = player.location.west
+        print(room_message.format(player.location.name))
+    elif direction == "north" and player.location.north is not None:
+        player.location = player.location.north
+        print(room_message.format(player.location.name))
+    elif direction == "south" and player.location.south is not None:
+        player.location = player.location.south
+        print(room_message.format(player.location.name))
+    else:
+        print("You can't go that way.")
 
 
 # check command (inventory and items)
@@ -181,7 +202,8 @@ def check(player, args):
                 else:
                     print("{0} x{1}".format(item.name, item.quantity))
     # if the second word is an item name
-    # items not implemented yet (breaks game right now [AttributeError: 'str' object has no attribute 'raw']
+    # items not implemented yet (breaks game right now
+    # [AttributeError: 'str' object has no attribute 'raw']
     # [line 17, in __contains__return item.raw in self.inside])
     elif args[1] in player.inventory:
         print("Items not implemented yet")
@@ -241,6 +263,7 @@ commands = {
     "quit": escape,
     "look": look,
     "read": read,
+    "go": go,
 }
 
 # dictionary of invisible commands
@@ -272,6 +295,20 @@ def main_menu():
     print("========")
 
 
+# Sets the player's beginning location
+def set_location():
+    # begins in the hall for now
+    player.location = hall
+
+
+# Connect the rooms
+def connect_rooms():
+    hall.connect(east=bedroom)
+    bedroom.connect(west=hall, south=bathroom)
+    kitchen.connect(north=hall)
+    bathroom.connect(north=bedroom)
+
+
 # Performs an intro for the player
 def intro():
     print("Your vision is blurry when you open your eyes, but you're not "
@@ -284,13 +321,21 @@ def intro():
 def show_room():
     # print the player's current location
     print("-------------------------")
-    print("You are in the {0}.".format(player.location.name))
+    print("You are in the {0}. To the east is the {1}. To the south is the {2}.".format(player.location.name, player.location.east, player.location.south))
+    # print the player's location's directions
+    print("North: {0}".format(player.location.north))
+    print("South: {0}".format(player.location.south))
+    print("East: {0}".format(player.location.east))
+    print("West: {0}".format(player.location.west))
     # print the current inventory
     print("Inventory: {0}".format(player.inventory))
+
 
 # the main game call
 def main():
     main_menu()
+    set_location()
+    connect_rooms()
     intro()
     show_room()
 
