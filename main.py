@@ -161,6 +161,7 @@ bathroom = Room("Bathroom", "It's the bathroom.")
 
 # go command (player location)
 def go(player, args):
+    # need to add doors now (unlocked/closed, opened, locked)
     direction = args[1]
     room_message = "You stepped into the {0}."
     if direction == "east" and player.location.east is not None:
