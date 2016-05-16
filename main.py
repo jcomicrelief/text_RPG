@@ -6,6 +6,8 @@ class Container(object):
     def __init__(self, name):
         self.name = name
         self.inside = {}
+        # testing Container's ability to open and close
+        self.status = "opened"
 
     def __iter__(self):
         return iter(self.inside.items())
@@ -44,14 +46,31 @@ class Container(object):
             self[item].quantity -= quantity
             self[item].recalculate()
 
+    def open(self):
+        if self.status == "closed":
+            self.status = "opened"
+
+    def close(self):
+        if self.status == "opened":
+            self.status = "closed"
+
+    def lock(self):
+        if self.status == "closed":
+            self.status = "locked"
+
+    def unlock(self):
+        if self.status == "locked":
+            self.status = "closed"
+
 
 """Item"""
 
 
 class Item(object):
-    def __init__(self, name, value, quantity=1):
+    def __init__(self, name, description, value=0, quantity=1):
         self.name = name
         self.raw = name.strip().lower()
+        self.description = description
         self.quantity = quantity
 
         self.value = value
@@ -65,21 +84,22 @@ class Item(object):
 """Interactive Objects"""
 
 
-class Object(Container):
-    def __init__(self, name, description, *items):
+class Object(Container, Item):
+    def __init__(self, name, description, status="opened"):
         Container.__init__(self, name)
+        Item.__init__(self, name, description, value=0, quantity=1)
         self.description = description
         self.inside = {}
+        self.status = status
 
 
 """Rooms"""
 
 
 class Room(Container):
-    def __init__(self, name, description, *objects):
+    def __init__(self, name, description):
         Container.__init__(self, name)
         self.description = description
-        self.inside = {}
 
         self.north = None
         self.south = None
@@ -107,6 +127,8 @@ class Room(Container):
         self.up = up
         if up:
             up.down = up
+
+    # def door(self, north="opened", south="opened", east="opened", west="opened"):
 
 
 """Character"""
@@ -147,13 +169,32 @@ class Player(Character):
 
 """Basic Variables"""
 player = Player("Default", 1, 1)
+"""Items in Objects"""
+notebook = Item("notebook", "Good for taking notes.")
+blanket = Item("blanket", "Fleece, nice, and warm.")
+flashlight = Item("flashlight", "Creates light. No batteries.")
+batteries = Item("batteries", "Give life to electronics.")
+"""Objects in Rooms"""
+table = Object("table", "It must be made of maple. Or oak.", "opened")
+lamp = Object("lamp", "Made in China. Why is everything made in China?")
+closet = Object("closet", "A musty closet.", "closed")
+desk = Object("desk", "A dusty desk.", "opened")
+bed = Object("bed", "An unmade bed.")
+fridge = Object("fridge", "An empty fridge. Well...it's got mold. Better shut it.", "opened")
+microwave = Object("microwave", "A broken microwave.")
+hamper = Object("hamper", "A hamper full of dirty clothes. That smells!")
+toilet = Object("toilet", "A filthy toilet.")
 """Room Variables"""
 hall = Room("Hall", "The hall looks like a room.")
 bedroom = Room("Bedroom", "It's the bedroom.")
 kitchen = Room("Kitchen", "It's the kitchen.")
 bathroom = Room("Bathroom", "It's the bathroom.")
-"""Connect Rooms"""
-
+"""Notes Dictionary"""
+notes = {
+    # required: "nt desc", "title", "text"
+    1: {"nt desc": "scrap of paper", "title": "test", "text": "This is just a piece of notebook paper"},
+    2: {"nt desc": "crumpled ball of paper", "title": "goodbye", "text": "old paper"},
+}
 
 """Commands"""
 # note to self: use 'args' as the player's raw_input
@@ -205,7 +246,7 @@ def check(player, args):
     # if the second word is an item name
     # items not implemented yet (breaks game right now
     # [AttributeError: 'str' object has no attribute 'raw']
-    # [line 17, in __contains__return item.raw in self.inside])
+    # [line 19, in __contains__return item.raw in self.inside]
     elif args[1] in player.inventory:
         print("Items not implemented yet")
     else:
@@ -213,7 +254,7 @@ def check(player, args):
 
 
 # quit command
-def escape(player, args):
+def escape(player):
     player.die("Thanks for playing!")
 
 
@@ -223,9 +264,14 @@ def look(player, args):
     if args[1] == "around":
         print(player.location.description)
     # if second word is 'at'
-    # objects in rooms not implemented yet
+    # objects in room having same issue as items in inventory
+    # [AttributeError: 'str' object has no attribute 'raw']
+    # [line 19, in __contains__ return item.raw in self.inside])
     elif args[1] == "at":
-        print("Objects in rooms not implemented yet")
+        if args[2] in player.location:
+            print("Object is here.")
+        else:
+            print("Object not working")
     else:
         print("Look where?")
 
@@ -249,7 +295,7 @@ def read(player, args):
 
 
 # help command
-def aid(player, args):
+def aid():
     lst = []
     for command in commands:
         lst.append(command)
@@ -310,6 +356,14 @@ def connect_rooms():
     bathroom.connect(north=bedroom)
 
 
+# Add objects into rooms
+def add_objects():
+    # hall objects
+    hall.add(table)
+    hall.add(lamp)
+    hall.add(closet)
+
+
 # Performs an intro for the player
 def intro():
     print("Your vision is blurry when you open your eyes, but you're not "
@@ -322,14 +376,10 @@ def intro():
 def show_room():
     # print the player's current location
     print("-------------------------")
-    print("You are in the {0}. To the east is the {1}. To the south is the {2}.".format(player.location.name, player.location.east, player.location.south))
-    # print the player's location's directions
-    print("North: {0}".format(player.location.north))
-    print("South: {0}".format(player.location.south))
-    print("East: {0}".format(player.location.east))
-    print("West: {0}".format(player.location.west))
+    print("You are in the {0}.".format(player.location.name))
+    print("Interactive objects: {0}".format(", ".join(player.location.inside.keys())))
     # print the current inventory
-    print("Inventory: {0}".format(player.inventory))
+    print("Inventory: {0}".format(player.inventory.inside.keys()))
 
 
 # the main game call
@@ -337,6 +387,7 @@ def main():
     main_menu()
     set_location()
     connect_rooms()
+    add_objects()
     intro()
     show_room()
 
@@ -348,5 +399,6 @@ def main():
             run_cmd(user[0], user, player)
         else:
             print("Not a valid command.")
+        show_room()
 
 main()
