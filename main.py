@@ -196,6 +196,12 @@ notes = {
     2: {"nt desc": "crumpled ball of paper", "title": "goodbye", "text": "old paper"},
 }
 
+
+# converts player input from strings
+def input_converter(input):
+    return eval(" ".join(input))
+    
+
 """Commands"""
 # note to self: use 'args' as the player's raw_input
 
@@ -244,7 +250,8 @@ def check(player, args):
     # if the second word is an item name
     else:
         # next line breaks when multiple words
-        item = eval(" ".join(args[1:-1]))
+        # DELETE: item = eval(" ".join(args[1:-1]))
+        item = input_converter(args[1:-1])
         if item in player.inventory:
             print(item.description)
         else:
@@ -262,7 +269,8 @@ def look(player, args):
     # [line 19, in __contains__ return item.raw in self.inside])
     elif args[1] == "at":
         # next line breaks when multiple words
-        object = eval(" ".join(args[2:-1]))
+        #DELETE: object = eval(" ".join(args[2:-1]))
+        object = input_converter(args[2:-1])
         if object in player.location:
             print(object.description)
         else:
@@ -273,7 +281,8 @@ def look(player, args):
 
 # search command (usage: search [object])
 def search(player, args):
-    obj = eval(" ".join(args[1:-1]))
+    # DELETE: obj = eval(" ".join(args[1:-1]))
+    obj = input_converter(args[1:-1])
     if obj in player.location:
         if len(obj) == 0:
             print("Nothing of interest here.")
