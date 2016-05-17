@@ -7,4 +7,6 @@ So here it is, my attempt to make a text rpg adventure game.
 
 Status: WIP
 
+Date Started: 5/3/3016
+
 Days: 14
