@@ -7,7 +7,7 @@ Background: There's a folder called "dct old version." I began creating this gam
 
 Limitations: setting (work VS home), programs (Codecademy & Notepad++ VS PyCharm), time (if you don't have time, you MAKE time), personal understanding of language
 
-Main Issue: How to implement doors? Through the Room class? Or create a Door class? Work "door status" into the Container class?
+Pondering Issue: How to implement doors? Through the Room class? Or create a Door class? Work "door status" into the Container class?
 
 Status: WIP
 
