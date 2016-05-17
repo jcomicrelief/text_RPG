@@ -84,11 +84,11 @@ class Item(object):
 """Interactive Objects"""
 
 
-class Object(Container, Item):
+class Object(Container):
     def __init__(self, name, description, status="opened"):
         Container.__init__(self, name)
-        Item.__init__(self, name, description, value=0, quantity=1)
         self.description = description
+        self.raw = name.strip().lower()
         self.inside = {}
         self.status = status
 
@@ -200,7 +200,7 @@ notes = {
 # note to self: use 'args' as the player's raw_input
 
 
-# go command (player location)
+# go command (usag: go [direction])
 def go(player, args):
     # need to add doors now (unlocked/closed, opened, locked)
     direction = args[1]
@@ -221,7 +221,7 @@ def go(player, args):
         print("You can't go that way.")
 
 
-# check command (inventory and items)
+# check command (usage: check inventory/check [item])
 def check(player, args):
     # if second word is 'inventory'
     if args[1] == "inventory":
@@ -253,12 +253,7 @@ def check(player, args):
         print("Check what?")
 
 
-# quit command
-def escape(player):
-    player.die("Thanks for playing!")
-
-
-# look command (around and at)
+# look command (usage: look around/look at [object])
 def look(player, args):
     # if second word is 'around'
     if args[1] == "around":
@@ -268,15 +263,45 @@ def look(player, args):
     # [AttributeError: 'str' object has no attribute 'raw']
     # [line 19, in __contains__ return item.raw in self.inside])
     elif args[1] == "at":
-        if args[2] in player.location:
-            print("Object is here.")
+        object = eval(" ".join(args[2:-1]))
+        if object in player.location:
+            print(object.description)
         else:
-            print("Object not working")
+            print("There's no {0} here.".format(object.name))
     else:
         print("Look where?")
 
 
-# read command (journal and titles)
+# search command (usage: search [object])
+def search(player, args):
+    obj = eval(" ".join(args[1:-1]))
+    if obj in player.location:
+        if len(obj) == 0:
+            print("Nothing of interest here.")
+        else:
+            print("You find: \n{0}".format(", ".join(obj.inside.keys())))
+    else:
+        print("There's no {0} to search.".format(obj.name))
+
+
+# take command (take [item] from [object])
+def take(player, args):
+    if args[0] == "take":
+        if len(args) >= 4:
+            item = eval(args[1])
+            obj = eval(args[3])
+            if args[2] == "from":
+                if obj in player.location and item in obj:
+                    if len(obj) == 0:
+                        print("There's nothing to take.")
+                    else:
+                        player.inventory.add(item)
+                        obj.remove(item)
+        else:
+            print("What are you taking from?")
+
+
+# read command (usage: read journal/read [title])
 def read(player, args):
     # if second word is 'journal'
     if args[1] == "journal":
@@ -294,7 +319,12 @@ def read(player, args):
         print("Read what?")
 
 
-# help command
+# quit command (usage: quit)
+def escape(player, args):
+    player.die("Thanks for playing!")
+
+
+# help command (usage: help)
 def aid():
     lst = []
     for command in commands:
@@ -311,6 +341,8 @@ commands = {
     "look": look,
     "read": read,
     "go": go,
+    "search": search,
+    "take": take,
 }
 
 # dictionary of invisible commands
@@ -362,6 +394,28 @@ def add_objects():
     hall.add(table)
     hall.add(lamp)
     hall.add(closet)
+    # bedroom objects
+    bedroom.add(bed)
+    bedroom.add(desk)
+    # kitchen objects
+    kitchen.add(fridge)
+    kitchen.add(microwave)
+    # bathroom objects
+    bathroom.add(hamper)
+    bathroom.add(toilet)
+
+
+# Add items to objects
+#def add_items():
+    # hall items
+    table.add(notebook)
+    table.add(flashlight)
+    closet.add(blanket)
+    # bedroom items
+    desk.add(batteries)
+    # kitchen items
+
+    # bathroom items
 
 
 # Performs an intro for the player
@@ -370,6 +424,20 @@ def intro():
           "worried. After the nightmare of being kidnapped and brought to a "
           "strange house, you doubt that anything is out of the ordinary. "
           "Until your vision clears and you find yourself still in the house.")
+
+
+# testing objects vs items in room
+def objvsit():
+    inv = player.location.inside
+    objs = []
+    its = []
+    for key in inv.iteritems():
+        if issubclass(key, Container):
+            objs.append(key)
+        if issubclass(key, Item):
+            its.append(key)
+    print("Interactive objects: {0}".format(", ".join(objs)))
+    print("Items in room: {0}".format(", ".join(its)))
 
 
 # for testing purposes
@@ -389,9 +457,12 @@ def main():
     connect_rooms()
     add_objects()
     intro()
-    show_room()
+    #show_room()
 
     while not player.dead:
+        # testing (START)
+        show_room()
+        # testing (END)
         line = raw_input(">> ")
         user = line.split()
         user.append("EOI")
@@ -399,6 +470,5 @@ def main():
             run_cmd(user[0], user, player)
         else:
             print("Not a valid command.")
-        show_room()
 
 main()
