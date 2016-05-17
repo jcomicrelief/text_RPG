@@ -1,5 +1,5 @@
-""""""
-"""Container"""
+"""TEXT ADVENTURE RPG GAME - JCOMICRELIEF"""
+"""CONTAINER CLASS"""
 
 
 class Container(object):
@@ -66,7 +66,7 @@ class Container(object):
             self.status = "closed"
 
 
-"""Item"""
+"""ITEM CLASS"""
 
 
 class Item(object):
@@ -84,7 +84,7 @@ class Item(object):
         self.net_value = self.quantity * self.value
 
 
-"""Interactive Objects"""
+"""INTERACTIVE OBJECTS CLASS"""
 
 
 class Object(Container):
@@ -96,7 +96,7 @@ class Object(Container):
         self.status = status
 
 
-"""Rooms"""
+"""ROOMS CLASS"""
 
 
 class Room(Container):
@@ -110,7 +110,7 @@ class Room(Container):
         self.sdoor = self.OPEN
 
         self.north = None
-        self.south = None
+        self.south= None
         self.east = None
         self.west = None
         self.up = None
@@ -135,12 +135,9 @@ class Room(Container):
         self.up = up
         if up:
             up.down = up
+            
 
-    def door(self, northern="opened", southern="opened", eastern="opened", western="opened"):
-        pass
-
-
-"""Character"""
+"""CHARACTER CLASSES"""
 
 
 # Character class that parents Enemy and Player
@@ -176,14 +173,14 @@ class Player(Character):
         # raw_input()
 
 
-"""Basic Variables"""
+"""BASIC VARIABLES"""
 player = Player("Default", 1, 1)
-"""Items in Objects"""
+"""ITEMS IN OBJECTS"""
 notebook = Item("notebook", "Good for taking notes.")
 blanket = Item("blanket", "Fleece, nice, and warm.")
 flashlight = Item("flashlight", "Creates light. No batteries.")
 batteries = Item("batteries", "Give life to electronics.")
-"""Objects in Rooms"""
+"""OBJECTS IN ROOMS"""
 table = Object("table", "It must be made of maple. Or oak.", "opened")
 lamp = Object("lamp", "Made in China. Why is everything made in China?")
 closet = Object("closet", "A musty closet.", "closed")
@@ -193,12 +190,12 @@ fridge = Object("fridge", "An empty fridge. Well...it's got mold. Better shut it
 microwave = Object("microwave", "A broken microwave.")
 hamper = Object("hamper", "A hamper full of dirty clothes. That smells!")
 toilet = Object("toilet", "A filthy toilet.")
-"""Room Variables"""
+"""ROOM VARIABLES"""
 hall = Room("Hall", "The hall looks like a room.")
 bedroom = Room("Bedroom", "It's the bedroom.")
 kitchen = Room("Kitchen", "It's the kitchen.")
 bathroom = Room("Bathroom", "It's the bathroom.")
-"""Notes Dictionary"""
+"""NOTES DICTIONARY"""
 notes = {
     # required: "nt desc", "title", "text"
     1: {"nt desc": "scrap of paper", "title": "test", "text": "This is just a piece of notebook paper"},
@@ -206,12 +203,30 @@ notes = {
 }
 
 
+"""METHODS FOR COMMANDS"""
+
+
 # converts player input from strings
+# usage: 
 def input_converter(input):
     return eval(" ".join(input))
     
+    
+# door check: used by 'go' command
+def door_check(dirdoor, direction):
+    room_message = "You stepped into the {0}."
+    # if door is opened
+    if dirdoor == "opened":
+        player.location = direction
+        print(room_message.format(player.location.name))
+    # if door is closed
+    elif dirdoor == "closed":
+        print("The door is closed.")
+    # if door is locked
+    else:
+        print("The door is locked. Find a way to open it.")
 
-"""Commands"""
+"""COMMANDS"""
 # note to self: use 'args' as the player's raw_input
 
 
@@ -221,21 +236,21 @@ def go(player, args):
     # also need to add directions up and down
     # needs to be a better way to write this to make it neater
     direction = args[1]
-    room_message = "You stepped into the {0}."
-    if direction == "east" and player.location.east is not None and player.location.edoor == "opened":
-        player.location = player.location.east
-        print(room_message.format(player.location.name))
-    elif direction == "west" and player.location.west is not None and player.location.wdoor == "opened":
-        player.location = player.location.west
-        print(room_message.format(player.location.name))
-    elif direction == "north" and player.location.north is not None and player.location.ndoor == "opened":
-        player.location = player.location.north
-        print(room_message.format(player.location.name))
-    elif direction == "south" and player.location.south is not None and player.location.sdoor == "opened":
-        player.location = player.location.south
-        print(room_message.format(player.location.name))
+    # if player types "go east"
+    if direction == "east" and player.location.east is not None:
+        door_check(player.location.edoor, player.location.east)
+    # if player types "go west"
+    elif direction == "west" and player.location.west is not None:
+        door_check(player.location.wdoor, player.location.west)
+    # if player types "go north"
+    elif direction == "north" and player.location.north is not None:
+       door_check(player.location.ndoor, player.location.north)
+    # if player types "go south"
+    elif direction == "south" and player.location.south is not None:
+        door_check(player.location.sdoor, player.location.south)
+    # if there's no room in given direction or anything undefined follows "go"
     else:
-        print("You can't go that way.")
+        print("Can't go that way.")
 
 
 # check command (usage: check inventory/check [item])
@@ -260,8 +275,7 @@ def check(player, args):
                     print("{0} x{1}".format(item.name, item.quantity))
     # if the second word is an item name
     else:
-        # next line breaks when multiple words
-        # DELETE: item = eval(" ".join(args[1:-1]))
+        # next line breaks with multiple words
         item = input_converter(args[1:-1])
         if item in player.inventory:
             print(item.description)
@@ -275,12 +289,8 @@ def look(player, args):
     if args[1] == "around":
         print(player.location.description)
     # if second word is 'at'
-    # objects in room having same issue as items in inventory
-    # [AttributeError: 'str' object has no attribute 'raw']
-    # [line 19, in __contains__ return item.raw in self.inside])
     elif args[1] == "at":
-        # next line breaks when multiple words
-        #DELETE: object = eval(" ".join(args[2:-1]))
+        # next line breaks with multiple words
         object = input_converter(args[2:-1])
         if object in player.location:
             print(object.description)
@@ -292,7 +302,6 @@ def look(player, args):
 
 # search command (usage: search [object])
 def search(player, args):
-    # DELETE: obj = eval(" ".join(args[1:-1]))
     obj = input_converter(args[1:-1])
     if obj in player.location:
         if len(obj) == 0:
@@ -390,7 +399,7 @@ def run_cmd(cmd, args, player):
     commands[cmd](player, args)
 
 
-"""Main game file"""
+"""MAIN GAME FILE"""
 
 
 # defines the main menu for the player before launching into the game
@@ -416,7 +425,7 @@ def connect_rooms():
 
 # Setting doors
 def set_doors():
-    hall.sdoor = "closed"
+    hall.edoor = "closed"
 
 # Add objects into rooms
 def add_objects():
@@ -456,6 +465,7 @@ def intro():
           "Until your vision clears and you find yourself still in the house.")
 
 
+# DELETE: should be able to delete safely
 # testing objects vs items in room
 def objvsit():
     inv = player.location.inside
