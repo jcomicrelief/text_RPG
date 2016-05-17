@@ -3,11 +3,14 @@
 
 
 class Container(object):
+    OPEN = "opened"
+    CLOSED = "closed"
+    LOCKED = "locked"
     def __init__(self, name):
         self.name = name
         self.inside = {}
         # testing Container's ability to open and close
-        self.status = "opened"
+        self.status = self.OPEN
 
     def __iter__(self):
         return iter(self.inside.items())
@@ -100,6 +103,11 @@ class Room(Container):
     def __init__(self, name, description):
         Container.__init__(self, name)
         self.description = description
+        
+        self.edoor = self.OPEN
+        self.wdoor = self.OPEN
+        self.ndoor = self.OPEN
+        self.sdoor = self.OPEN
 
         self.north = None
         self.south = None
@@ -128,7 +136,8 @@ class Room(Container):
         if up:
             up.down = up
 
-    # def door(self, north="opened", south="opened", east="opened", west="opened"):
+    def door(self, northern="opened", southern="opened", eastern="opened", western="opened"):
+        pass
 
 
 """Character"""
@@ -209,18 +218,20 @@ def input_converter(input):
 # go command (usag: go [direction])
 def go(player, args):
     # need to add doors now (unlocked/closed, opened, locked)
+    # also need to add directions up and down
+    # needs to be a better way to write this to make it neater
     direction = args[1]
     room_message = "You stepped into the {0}."
-    if direction == "east" and player.location.east is not None:
+    if direction == "east" and player.location.east is not None and player.location.edoor == "opened":
         player.location = player.location.east
         print(room_message.format(player.location.name))
-    elif direction == "west" and player.location.west is not None:
+    elif direction == "west" and player.location.west is not None and player.location.wdoor == "opened":
         player.location = player.location.west
         print(room_message.format(player.location.name))
-    elif direction == "north" and player.location.north is not None:
+    elif direction == "north" and player.location.north is not None and player.location.ndoor == "opened":
         player.location = player.location.north
         print(room_message.format(player.location.name))
-    elif direction == "south" and player.location.south is not None:
+    elif direction == "south" and player.location.south is not None and player.location.sdoor == "opened":
         player.location = player.location.south
         print(room_message.format(player.location.name))
     else:
@@ -403,6 +414,10 @@ def connect_rooms():
     bathroom.connect(north=bedroom)
 
 
+# Setting doors
+def set_doors():
+    hall.sdoor = "closed"
+
 # Add objects into rooms
 def add_objects():
     # hall objects
@@ -470,6 +485,7 @@ def main():
     main_menu()
     set_location()
     connect_rooms()
+    set_doors()
     add_objects()
     intro()
     #show_room()
