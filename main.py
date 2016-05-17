@@ -229,10 +229,8 @@ def check(player, args):
         if len(player.inventory) == 0:
             print("You aren't carrying anything.")
             # testing purposes (START)
-            potion = Item("Potion", 5, 2)
-            lizard = Item("Magical Lizard", 9000, 1)
-            player.inventory.add(potion)
-            player.inventory.add(lizard)
+            player.inventory.add(batteries)
+            player.inventory.add(blanket)
             # testing purposes (END)
         # if player has items
         else:
@@ -244,13 +242,13 @@ def check(player, args):
                 else:
                     print("{0} x{1}".format(item.name, item.quantity))
     # if the second word is an item name
-    # items not implemented yet (breaks game right now
-    # [AttributeError: 'str' object has no attribute 'raw']
-    # [line 19, in __contains__return item.raw in self.inside]
-    elif args[1] in player.inventory:
-        print("Items not implemented yet")
     else:
-        print("Check what?")
+        # next line breaks when multiple words
+        item = eval(" ".join(args[1:-1]))
+        if item in player.inventory:
+            print(item.description)
+        else:
+            print("Check what?")
 
 
 # look command (usage: look around/look at [object])
@@ -263,6 +261,7 @@ def look(player, args):
     # [AttributeError: 'str' object has no attribute 'raw']
     # [line 19, in __contains__ return item.raw in self.inside])
     elif args[1] == "at":
+        # next line breaks when multiple words
         object = eval(" ".join(args[2:-1]))
         if object in player.location:
             print(object.description)
@@ -287,8 +286,15 @@ def search(player, args):
 # take command (take [item] from [object])
 def take(player, args):
     if args[0] == "take":
-        if len(args) >= 4:
-            item = eval(args[1])
+        item = eval(args[1])
+        if 2<= len(args) <= 3:
+            if item in player.location:
+                if hasattr(item, "quantity"):
+                    player.inventory.add(item)
+                    player.location.remove(item)
+                else:
+                    print("You can't pick that up.")
+        elif len(args) >= 4:
             obj = eval(args[3])
             if args[2] == "from":
                 if obj in player.location and item in obj:
@@ -408,7 +414,7 @@ def add_objects():
 # Add items to objects
 #def add_items():
     # hall items
-    table.add(notebook)
+    hall.add(notebook)
     table.add(flashlight)
     closet.add(blanket)
     # bedroom items
