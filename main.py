@@ -1,4 +1,4 @@
-"""TEXT ADVENTURE RPG GAME - JCOMICRELIEF"""
+"""TEXT RPG GAME - JCOMICRELIEF"""
 """CONTAINER CLASS"""
 
 
@@ -110,7 +110,7 @@ class Room(Container):
         self.sdoor = self.OPEN
 
         self.north = None
-        self.south= None
+        self.south = None
         self.east = None
         self.west = None
         self.up = None
@@ -135,9 +135,9 @@ class Room(Container):
         self.up = up
         if up:
             up.down = up
-            
 
-"""CHARACTER CLASSES"""
+
+"""CHARACTER CLASS"""
 
 
 # Character class that parents Enemy and Player
@@ -190,12 +190,12 @@ fridge = Object("fridge", "An empty fridge. Well...it's got mold. Better shut it
 microwave = Object("microwave", "A broken microwave.")
 hamper = Object("hamper", "A hamper full of dirty clothes. That smells!")
 toilet = Object("toilet", "A filthy toilet.")
-"""ROOM VARIABLES"""
+"""LOCATIONS"""
 hall = Room("Hall", "The hall looks like a room.")
 bedroom = Room("Bedroom", "It's the bedroom.")
 kitchen = Room("Kitchen", "It's the kitchen.")
 bathroom = Room("Bathroom", "It's the bathroom.")
-"""NOTES DICTIONARY"""
+"""Notes Dictionary"""
 notes = {
     # required: "nt desc", "title", "text"
     1: {"nt desc": "scrap of paper", "title": "test", "text": "This is just a piece of notebook paper"},
@@ -203,54 +203,53 @@ notes = {
 }
 
 
-"""METHODS FOR COMMANDS"""
-
-
-# converts player input from strings
-# usage: 
-def input_converter(input):
-    return eval(" ".join(input))
-    
-    
 # door check: used by 'go' command
-def door_check(dirdoor, direction):
+def door_check(door, direction):
     room_message = "You stepped into the {0}."
     # if door is opened
-    if dirdoor == "opened":
+    if door == "opened":
         player.location = direction
         print(room_message.format(player.location.name))
     # if door is closed
-    elif dirdoor == "closed":
+    elif door == "closed":
         print("The door is closed.")
     # if door is locked
     else:
         print("The door is locked. Find a way to open it.")
 
+
+# converts player input from strings
+# usage: search, look, and take commands
+def input_converter(input):
+    return eval(" ".join(input))
+    
+
 """COMMANDS"""
 # note to self: use 'args' as the player's raw_input
 
 
-# go command (usag: go [direction])
+# go command (usage: go [direction])
 def go(player, args):
-    # need to add doors now (unlocked/closed, opened, locked)
-    # also need to add directions up and down
-    # needs to be a better way to write this to make it neater
-    direction = args[1]
-    # if player types "go east"
-    if direction == "east" and player.location.east is not None:
-        door_check(player.location.edoor, player.location.east)
-    # if player types "go west"
-    elif direction == "west" and player.location.west is not None:
-        door_check(player.location.wdoor, player.location.west)
-    # if player types "go north"
-    elif direction == "north" and player.location.north is not None:
-       door_check(player.location.ndoor, player.location.north)
-    # if player types "go south"
-    elif direction == "south" and player.location.south is not None:
-        door_check(player.location.sdoor, player.location.south)
-    # if there's no room in given direction or anything undefined follows "go"
-    else:
-        print("Can't go that way.")
+    if args[0] == "go":
+        # need to add doors now (unlocked/closed, opened, locked)
+        # also need to add directions up and down
+        # needs to be a better way to write this to make it neater
+        direction = args[1]
+        # if player types "go east"
+        if direction == "east" and player.location.east is not None:
+            door_check(player.location.edoor, player.location.east)
+        # if player types "go west"
+        elif direction == "west" and player.location.west is not None:
+            door_check(player.location.wdoor, player.location.west)
+        # if player types "go north"
+        elif direction == "north" and player.location.north is not None:
+            door_check(player.location.ndoor, player.location.north)
+        # if player types "go south"
+        elif direction == "south" and player.location.south is not None:
+            door_check(player.location.sdoor, player.location.south)
+        # if there's no room in given direction or anything undefined follows "go"
+        else:
+            print("Can't go that way.")
 
 
 # check command (usage: check inventory/check [item])
@@ -275,7 +274,8 @@ def check(player, args):
                     print("{0} x{1}".format(item.name, item.quantity))
     # if the second word is an item name
     else:
-        # next line breaks with multiple words
+        # next line breaks when multiple words
+        # DELETE: item = eval(" ".join(args[1:-1]))
         item = input_converter(args[1:-1])
         if item in player.inventory:
             print(item.description)
@@ -289,51 +289,72 @@ def look(player, args):
     if args[1] == "around":
         print(player.location.description)
     # if second word is 'at'
+    # objects in room having same issue as items in inventory
     elif args[1] == "at":
-        # next line breaks with multiple words
-        object = input_converter(args[2:-1])
-        if object in player.location:
-            print(object.description)
+        try:
+            # next line breaks when multiple words
+            object = input_converter(args[2:-1])
+        except NameError:
+            print("This object isn't in the room.")
         else:
-            print("There's no {0} here.".format(object.name))
+            if object in player.location:
+                print(object.description)
+            else:
+                print("There's no {0} here.".format(object.name))
     else:
         print("Look where?")
 
 
 # search command (usage: search [object])
 def search(player, args):
-    obj = input_converter(args[1:-1])
-    if obj in player.location:
-        if len(obj) == 0:
-            print("Nothing of interest here.")
-        else:
-            print("You find: \n{0}".format(", ".join(obj.inside.keys())))
+    try:
+        obj = input_converter(args[1:-1])
+    except NameError:
+        print("This object doesn't exist.")
     else:
-        print("There's no {0} to search.".format(obj.name))
+        if obj in player.location:
+            if len(obj) == 0:
+                print("Nothing of interest here.")
+            else:
+                print("You find: \n{0}".format(", ".join(obj.inside.keys())))
+        else:
+            print("There's no {0} to search.".format(obj.name))
 
 
 # take command (take [item] from [object])
 def take(player, args):
     if args[0] == "take":
-        item = eval(args[1])
-        if 2<= len(args) <= 3:
-            if item in player.location:
-                if hasattr(item, "quantity"):
-                    player.inventory.add(item)
-                    player.location.remove(item)
-                else:
-                    print("You can't pick that up.")
-        elif len(args) >= 4:
-            obj = eval(args[3])
-            if args[2] == "from":
-                if obj in player.location and item in obj:
-                    if len(obj) == 0:
-                        print("There's nothing to take.")
-                    else:
-                        player.inventory.add(item)
-                        obj.remove(item)
+        try:
+            item = eval(args[1])
+        except NameError:
+            # DELETE: item = args[1]
+            print("This item doesn't exist.")
         else:
-            print("What are you taking from?")
+            if 2 <= len(args) <= 3:
+                if item in player.location:
+                    if hasattr(item, "quantity"):
+                        player.inventory.add(item)
+                        player.location.remove(item)
+                    else:
+                        print("You can't pick that up.")
+                else:
+                    print("That item doesn't exist.")
+            elif len(args) >= 4:
+                try:
+                    obj = eval(args[3])
+                except NameError:
+                    # DELETE: obj = args[3]
+                    print("This object doesn't exist.")
+                else:
+                    if args[2] == "from":
+                        if obj in player.location and item in obj:
+                            if len(obj) == 0:
+                                print("There's nothing to take.")
+                            else:
+                                player.inventory.add(item)
+                                obj.remove(item)
+            else:
+                print("What are you taking from?")
 
 
 # read command (usage: read journal/read [title])
@@ -425,7 +446,7 @@ def connect_rooms():
 
 # Setting doors
 def set_doors():
-    hall.edoor = "closed"
+    hall.sdoor = "closed"
 
 # Add objects into rooms
 def add_objects():
@@ -445,7 +466,7 @@ def add_objects():
 
 
 # Add items to objects
-#def add_items():
+def add_items():
     # hall items
     hall.add(notebook)
     table.add(flashlight)
@@ -465,21 +486,6 @@ def intro():
           "Until your vision clears and you find yourself still in the house.")
 
 
-# DELETE: should be able to delete safely
-# testing objects vs items in room
-def objvsit():
-    inv = player.location.inside
-    objs = []
-    its = []
-    for key in inv.iteritems():
-        if issubclass(key, Container):
-            objs.append(key)
-        if issubclass(key, Item):
-            its.append(key)
-    print("Interactive objects: {0}".format(", ".join(objs)))
-    print("Items in room: {0}".format(", ".join(its)))
-
-
 # for testing purposes
 def show_room():
     # print the player's current location
@@ -497,8 +503,8 @@ def main():
     connect_rooms()
     set_doors()
     add_objects()
+    add_items()
     intro()
-    #show_room()
 
     while not player.dead:
         # testing (START)
