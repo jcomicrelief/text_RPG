@@ -7,7 +7,7 @@ So here it is, my attempt to make a text rpg adventure game. The idea, thus far,
 
 Background: There's a folder called "dct old version." I began creating this game using dictionaries for everything because I was intimidated by using OOP. 11 days into creation, I added the feature of "doors" to the "rooms" and broke the 'object converter' I had created (to make my separate objects dictionary work with my rooms dictionary). Several hours passed, and I made the hard decision to start over, using classes instead of dictionaries. Obviously, I still use dictionaries in my code, but all my items, objects, and rooms have been created through classes. I've kept the folder because my current version isn't up-to-date with it so I have it as a reference. May or may not remove it once I've passed its condition.
 
-Limitations: setting (work VS home), programs (Codecademy Labs & Notepad++ VS PyCharm), time (if you don't have time, you MAKE time), personal understanding of language
+Limitations: time (if you don't have time, you MAKE time), personal understanding of language
 
 Pondering Issue: Properly dealing with errors and exceptions to avoid breaks.
 
