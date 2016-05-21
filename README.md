@@ -1,5 +1,4 @@
 # Applying Python in a Text Adventure game
-Important Note: Code is in one file because of the limitation of Codecademy Labs!
 
 After almost finishing a Python course on Udemy, I decided to create a game to apply my newly gained knowledge through a medium that I love. I'm not one to simply know how to use it after watching tutorials and taking notes.
 
