@@ -1,6 +1,6 @@
-import Pygame
+import pygame
 import sys
-from Pygame.locals import *
+from pygame.locals import *
 import random
 
 # Variables for height and width of game display (multiples of 32)
@@ -27,10 +27,10 @@ COAL = 3
 # a dictionary linking resources to colors
 # PROBABLY NEED TO CREATE IMAGES
 textures = {
-    DIRT: Pygame.image.load("dirt.png"),
-    GRASS: Pygame.image.load("grass.png"),
-    WATER: Pygame.image.load("water.png"),
-    COAL: Pygame.image.load("coal.png")
+    DIRT: pygame.image.load("dirt.png"),
+    GRASS: pygame.image.load("grass.png"),
+    WATER: pygame.image.load("water.png"),
+    COAL: pygame.image.load("coal.png")
 }
 
 # a list representing our tilemap
@@ -55,16 +55,16 @@ inventory = {
 resources = [DIRT, GRASS, WATER, COAL]
 
 # initialise the pygame module
-Pygame.init()
+pygame.init()
 # create a new drawing surface
-setDisplay = Pygame.display.set_mode((display_width, display_height + 50))
+setDisplay = pygame.display.set_mode((display_width, display_height + 50))
 # give the window a caption
-Pygame.display.set_caption("MY FIRST GAME")
+pygame.display.set_caption("MY FIRST GAME")
 # create a green square (display, color, (x, y, width, height))
 # pygame.draw.rect(setDisplay, GREEN, (100, 50, 20, 20))
 
 # the player image
-PLAYER = Pygame.image.load("player.png").convert_alpha()
+PLAYER = pygame.image.load("player.png").convert_alpha()
 # the position of the player [x, y]
 playerPos = [0, 0]
 
@@ -89,18 +89,18 @@ for rw in range(map_height):
         tilemap[rw][cl] = tile
 
 # font for textboxes
-font = Pygame.font.SysFont(None, 25)
+font = pygame.font.SysFont(None, 25)
 # add a font for our inventory
-INVFONT = Pygame.font.Font(None, 18)
+INVFONT = pygame.font.Font(None, 18)
 
 # loop (repeat) forever
 while True:
     # get all the user events
-    for event in Pygame.event.get():
+    for event in pygame.event.get():
         # if the user wants to quit
         if event.type == QUIT:
             # end the game and close the window
-            Pygame.quit()
+            pygame.quit()
             sys.exit()
         # if a key is pressed
         elif event.type == KEYDOWN:
@@ -172,8 +172,6 @@ while True:
                     # swap the item that was there before
                     inventory[currentTile] += 1
 
-
-
     # loop through each row
     for row in range(map_height):
         # loop through each column in the row
@@ -196,4 +194,4 @@ while True:
         placePosition += 50
 
     # update the display
-    Pygame.display.update()
+    pygame.display.update()
